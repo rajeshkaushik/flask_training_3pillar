@@ -1,10 +1,13 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 
 from users.models import User
+from users import auth
 from my_app import db
 
 
 class UserListApi(Resource):
+    #decorators = [auth.login_required]
+
     def get(self):
         users = User.query.all() 
         return {'users': [user.to_dict() for user in users]}

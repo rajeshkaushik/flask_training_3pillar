@@ -1,57 +1,63 @@
-from flask import jsonify, request, abort
+from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 
 from users.models import User
-from my_app import app, db
-
-@app.route('/api/v1.0/users', methods=['GET'])
-def get_users():
-    users = User.query.all() 
-    return jsonify({'users': [user.to_dict() for user in users]})
+from my_app import db
 
 
-@app.route('/api/v1.0/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    user = User.query.filter_by(id=user_id).first() 
-    if not user:
-        abort(404)
-    return jsonify(user.to_dict())
+class UserListApi(Resource):
+    def get(self):
+        users = User.query.all() 
+        return {'users': [user.to_dict() for user in users]}
 
-@app.route('/api/v1.0/users', methods=['POST'])
-def create_user():
-    if not request.json or not 'username' in request.json:
-        abort(400)
-    if not request.json or not 'email' in request.json:
-        abort(400)
-    user = {
-        'username': request.json['username'],
-        'email': request.json.get('email'),
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', required=True, help='username is required')
+        parser.add_argument('email', type=str, required=True)
+
+        user = parser.parse_args()
+
+        user = User(**user)
+        db.session.add(user)
+        db.session.commit()
+        return {'user': user.to_dict()}
+
+class UserApi(Resource):
+
+    user_resource_fields = {
+        'username': fields.String,
+        'email':  fields.String
     }
-    user = User(**user)
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({'user': user.to_dict()}), 201
 
-@app.route('/api/v1.0/users/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    user = User.query.filter_by(id=user_id).first() 
-    if not user:
-        abort(404)
-    if not request.json or not 'username' in request.json:
-        abort(400)
-    if not request.json or not 'email' in request.json:
-        abort(400)
-    user.username = request.json['username']
-    user.email =  request.json.get('email')
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({'user': user.to_dict()}), 200
+    @marshal_with(user_resource_fields)
+    def get(self, user_id):
+        user = User.query.filter_by(id=user_id).first() 
+        if not user:
+            abort(404, message="User {} doesn't exist".format(user_id))
+        return user
 
 
-@app.route('/api/v1.0/users/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    user = User.query.filter_by(id=user_id).first() 
-    if not user:
-        abort(404)
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify({'result': True})
+    #@marshal_with(user_resource_fields)
+    def put(self, user_id):
+        user = User.query.filter_by(id=user_id).first() 
+        if not user:
+            abort(404, message="User {} doesn't exist".format(user_id))
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', required=True, help='username is required')
+        parser.add_argument('email', type=str, required=True)
+
+        args = parser.parse_args()
+        user.username = args['username']
+        user.email =  args['email']
+        db.session.add(user)
+        db.session.commit()
+        #return user
+        return marshal(user, self.user_resource_fields), 200
+
+
+    def delete(self, user_id):
+        user = User.query.filter_by(id=user_id).first() 
+        if not user:
+            abort(404, message="User {} doesn't exist".format(user_id))
+        db.session.delete(user)
+        db.session.commit()
+        return '', 204

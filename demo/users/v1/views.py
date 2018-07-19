@@ -6,7 +6,7 @@ from my_app import db
 
 
 class UserListApi(Resource):
-    #decorators = [auth.login_required]
+    decorators = [auth.login_required]
 
     def get(self):
         users = User.query.all() 

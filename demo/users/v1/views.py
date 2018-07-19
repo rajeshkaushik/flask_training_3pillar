@@ -22,7 +22,7 @@ class UserListApi(Resource):
         user = User(**user)
         db.session.add(user)
         db.session.commit()
-        return {'user': user.to_dict()}
+        return {'user': user.to_dict()}, 201
 
 class UserApi(Resource):
 

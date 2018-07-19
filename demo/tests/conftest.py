@@ -1,7 +1,5 @@
 from flask_testing import TestCase
 
-#import sys
-#sys.path.append('/Users/rajesh.kaushik/projects/flask_tutorial/flask_training_3pillar/demo')
 from my_app import create_app, db
 
 

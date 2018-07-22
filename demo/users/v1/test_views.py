@@ -24,4 +24,6 @@ class TestUserListApi(MyTestCase):
                 data=json.dumps({'username': 'u2', 'email':'test2@gmail.com'}),
                 content_type='application/json')
         self.assertEqual(201, resp.status_code)
+        resp = self.client.get('/api/v1.0/users', headers={"Authorization": "Basic " + base64.b64encode(b"rajesh:kaushik").decode('utf-8')})
+        self.assertEqual(2, len(resp.json.get('users')))
 

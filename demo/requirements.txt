@@ -39,3 +39,4 @@ SQLAlchemy==1.2.9
 traitlets==4.3.2
 wcwidth==0.1.7
 Werkzeug==0.14.1
+gunicorn==19.8.1

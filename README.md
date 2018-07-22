@@ -9,3 +9,38 @@ Running flake8 for static code analysis
 Checking test coverage report
 
     coverage run -m pytest && coverage report --omit='*lib/*.py,tests/*.py'
+
+
+# Environment variables
+These are the environement variables that are required for the app to function correctly. Add these to a `.env` file:
+
+    DB_USER=<user>
+    DB_PASS=<password>
+    DB_HOST=mssqldev
+    DB_PORT=1433
+    DB_NAME=flask_demo
+
+    MSSQL_SA_PASSWORD=<password>
+
+# Deploying with docker
+
+1. Create network
+
+        docker network create mynet
+
+2. Create and run application
+
+        docker build -t flask_demo:1 .
+        docker run --net mynet --name flask_demo --env-file env_vars -d -p 5000:5000 flask_demo:1
+
+3. Create and run MS SQL Server
+
+        docker build -t mssql -f Dockerfile-MSSQL .
+        docker run --net mynet --name mssql --env-file env_vars -d -p 1433:1433 mssql
+
+    If the image runs, use the following commands to create the database:
+
+        docker exec -it mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P <password>
+        > create database flask_demo
+        > go
+

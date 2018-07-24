@@ -1,7 +1,0 @@
-DB_USER=SA
-DB_PASS=complex123#pass
- #DB_HOST=172.20.10.90
-DB_HOST=mssqldev
-DB_PORT=1433
- 
-DB_NAME=flask_demo

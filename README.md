@@ -22,21 +22,18 @@ These are the environement variables that are required for the app to function c
 
     MSSQL_SA_PASSWORD=<password>
 
+Note: MSSQL password should be complex: letters, special_char, numbers.
+
 # Deploying with docker
 
 1. Create network
 
         docker network create mynet
 
-2. Create and run application
-
-        docker build -t flask_demo:1 .
-        docker run --net mynet --name flask_demo --env-file env_vars -d -p 5000:5000 flask_demo:1
-
-3. Create and run MS SQL Server
+2. Create and run MS SQL Server
 
         docker build -t mssql -f Dockerfile-MSSQL .
-        docker run --net mynet --name mssql --env-file env_vars -d -p 1433:1433 mssql
+        docker run --net mynet --name mssql --env-file .env -d -p 1433:1433 mssql
 
     If the image runs, use the following commands to create the database:
 
@@ -44,3 +41,12 @@ These are the environement variables that are required for the app to function c
         > create database flask_demo
         > go
 
+3. Create and run application
+
+        docker build -t flask_demo:1 .
+        docker run --net mynet --name flask_demo --env-file .env -d -p 5000:5000 flask_demo:1
+
+    If the image runs, use the following commands to create the schema:
+
+        docker exec -it flask_demo bash
+        # python create_db.py
